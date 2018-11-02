@@ -61,7 +61,8 @@ public class ActividadDAO {
 
 		ArrayList<Actividad> listaActividades = new ArrayList<Actividad>();
 
-		String sql = "select a.idActividad, a.nombre from actividad A join paquete_trabajo PT on A.PAQUETE_TRABAJO_idPaqueteTrabajo=PT.PROYECTO_idProyecto join proyecto P on PT.PROYECTO_idProyecto=P.idProyecto where P.idProyecto=? ";
+		String sql = "select a.idActividad, a.nombre from proyecto P join paquete_trabajo PT on p.idProyecto=pt.PROYECTO_idProyecto join actividad A on PT.idPaqueteTrabajo=A.PAQUETE_TRABAJO_idPaqueteTrabajo where idProyecto=?";
+		
 
 		try {
 			ps = jdbc.getConnection().prepareStatement(sql);
@@ -69,7 +70,7 @@ public class ActividadDAO {
 			System.out.println("QUERY:" + System.lineSeparator() + sql);
 			rs = ps.executeQuery();
 
-			if (rs.next()) {
+			while (rs.next()) {
 				Actividad actividad = new Actividad();
 				actividad.setIdActividad(rs.getInt("idActividad"));
 				actividad.setNombre(rs.getString("nombre"));
@@ -100,7 +101,7 @@ public class ActividadDAO {
 
 		ArrayList<Riesgo> listaRiesgos = new ArrayList<Riesgo>();
 
-		String sql = "select r.idRiesgo, r.nombre from riesgo R join riesgo_actividad RA on R.idRiesgo=RA.RIESGO_idRiesgo join actividad A on RA.ACTIVIDAD_idActividad=A.idActividad where A.idActividad=?";
+		String sql = "select DISTINCT r.idRiesgo, r.nombre from dbriesgo.riesgo R join dbriesgo.riesgo_actividad RA on R.idRiesgo=RA.RIESGO_idRiesgo join dbriesgo.actividad A on RA.ACTIVIDAD_idActividad=A.idActividad where A.idActividad=?";
 
 		try {
 			ps = jdbc.getConnection().prepareStatement(sql);
@@ -108,13 +109,15 @@ public class ActividadDAO {
 			System.out.println("QUERY:" + System.lineSeparator() + sql);
 			rs = ps.executeQuery();
 
-			if (rs.next()) {
+			while (rs.next()) {
 				Riesgo riesgo = new Riesgo();
 				riesgo.setRiesgoId(rs.getInt("idRiesgo"));
-				riesgo.setRiesgoNombre(rs.getString("idRiesgo"));
+				riesgo.setNombre(rs.getString("nombre"));
 				listaRiesgos.add(riesgo);
-				return listaRiesgos;
+				
 			}
+			
+			return listaRiesgos;
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
 		} catch (Exception e) {
@@ -138,7 +141,7 @@ public class ActividadDAO {
 
 		ArrayList<RevisionXActividad> listaRevisiones = new ArrayList<RevisionXActividad>();
 
-		String sql = "SELECT R.IdRevision, R.fecha, A.valorPlanificado AS PV, R.valorGanadoC AS EVC, R.valorGanadoS AS EVS, R.costoActual AS AC, r.SPI, r.CPI,  A.bac AS BAC , A.valorPlanificado - R.costoActual  AS VARIACION_COSTO , R.valorGanadoS - A.valorPlanificado  as  SV ,  DATE_ADD(fecha, INTERVAL cast(a.duracion  as int) DAY) as  CULMINACION_PRONOSTICADA from revision R inner join actividad A on R.ACTIVIDAD_idActividad= A.idActividad WHERE A.idActividad = ? order by R.Fecha desc";
+		String sql = "SELECT R.IdRevision, R.fecha, A.valorPlanificado AS PV, R.valorGanadoC AS EVC, R.valorGanadoS AS EVS, R.costoActual AS AC, r.SPI, r.CPI,  A.bac AS BAC , A.valorPlanificado - R.costoActual  AS VARIACION_COSTO , R.valorGanadoS - A.valorPlanificado  as  SV ,  DATE_ADD(fecha, INTERVAL cast(a.duracion  as signed) DAY) as  CULMINACION_PRONOSTICADA, R.cpi_descri as descripcionPronostico from revision R inner join actividad A on R.ACTIVIDAD_idActividad= A.idActividad WHERE A.idActividad = ? order by R.Fecha desc";
 
 		try {
 			ps = jdbc.getConnection().prepareStatement(sql);
@@ -146,14 +149,14 @@ public class ActividadDAO {
 			System.out.println("QUERY:" + System.lineSeparator() + sql);
 			rs = ps.executeQuery();
 
-			if (rs.next()) {
+			while (rs.next()) {
 
 				RevisionXActividad revisionActividad = new RevisionXActividad();
 
 				Revision rev = new Revision();
 				Actividad actividad = new Actividad();
 
-				rev.setIdRevision(rs.getInt("idRevision"));
+				rev.setIdRevision(rs.getInt("IdRevision"));
 				rev.setFecha(rs.getDate("fecha"));
 				rev.setValorGanadoC(rs.getDouble("EVC"));
 				rev.setValorGanadoS(rs.getDouble("EVS"));
@@ -165,9 +168,10 @@ public class ActividadDAO {
 				actividad.setBac(rs.getDouble("BAC"));
 
 				// revision.setFechaPlanificada(new java.util.Date(rs.getDate("CULMINACION_PROONOSTICADA").getTime()));
-				revisionActividad.setFechaPlanificada(rs.getDate("CULMINACION_PROONOSTICADA"));
-				revisionActividad.setVariacionCosto(rs.getDouble("variacionCosto"));
-				revisionActividad.setVariacionCronograma(rs.getDouble("variacionCronograma"));
+				revisionActividad.setFechaPlanificada(rs.getDate("CULMINACION_PRONOSTICADA"));
+				revisionActividad.setDescripcionPronostico(rs.getString("descripcionPronostico"));
+				revisionActividad.setVariacionCosto(rs.getDouble("VARIACION_COSTO"));
+				revisionActividad.setVariacionCronograma(rs.getDouble("SV"));
 
 				revisionActividad.setRevision(rev);
 				revisionActividad.setActividad(actividad);

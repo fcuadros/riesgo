@@ -1,10 +1,15 @@
 package com.tp2.modulo.sgr.dao;
 
+import java.sql.CallableStatement;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.tp2.modulo.sgr.database.ConnectionJDBC;
 import com.tp2.modulo.sgr.model.ActualizarNivelRiesgoRequest;
@@ -12,6 +17,7 @@ import com.tp2.modulo.sgr.model.CalcularNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
+import com.tp2.modulo.sgr.model.Riesgo;
 
 public class RiesgoDAO {
 
@@ -189,4 +195,264 @@ public class RiesgoDAO {
 		}
 		return respuesta;
 	}
+	
+	public ArrayList<Riesgo> getRiesgos() {
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		ArrayList<Riesgo> listaRiesgos = new ArrayList<Riesgo>();
+		
+		String sql = "select * from riesgo";
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);
+			System.out.println("QUERY getRiesgos:" + System.lineSeparator() + sql);
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				Riesgo riesgo = new Riesgo();
+				riesgo.setRiesgoId(rs.getInt("idRiesgo"));
+				riesgo.setNombre(rs.getString("nombre"));
+				riesgo.setDescripcion(rs.getString("descripcion"));
+				riesgo.setFechaRiesgo(rs.getDate("fechaRiesgo"));
+				riesgo.setTipo(rs.getInt("tipo"));
+				riesgo.setCosto(rs.getDouble("costo"));
+				riesgo.setProbabilidad(rs.getDouble("probabilidad"));
+				riesgo.setNivelRiesgo(rs.getInt("nivelRiesgo"));
+				riesgo.setPersonaIdentificadora(rs.getString("personaIdentificadora"));
+				listaRiesgos.add(riesgo);
+			}
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return listaRiesgos;
+	}
+	
+	public boolean registrarRiesgo(Riesgo riesgo) {
+		
+		PreparedStatement ps = null;
+		boolean respuesta = false;
+		String sql = "insert into riesgo(nombre, descripcion, fechaRiesgo, tipo, costo, probabilidad, nivelRiesgo, personaIdentificadora) "
+				+ "values (?,?,NOW(),?,?,?,?,?)";
+		Date fechaRiesgo = new Date(riesgo.getFechaRiesgo().getTime());
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);
+			ps.setString(1, riesgo.getNombre());
+			ps.setString(2, riesgo.getDescripcion());
+			ps.setDate(3, fechaRiesgo);
+			ps.setInt(4, riesgo.getTipo());
+			ps.setDouble(5, riesgo.getCosto());
+			ps.setDouble(6, riesgo.getProbabilidad());
+			ps.setInt(7, riesgo.getNivelRiesgo());
+			ps.setString(8, riesgo.getPersonaIdentificadora());
+			System.out.println("QUERY registrarRiesgo: " + sql);
+			ps.execute();
+			ps.close();
+			respuesta = true;
+			
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return respuesta;
+	}
+	
+	public boolean actualizarRiesgo(Riesgo riesgo) {
+		
+		PreparedStatement ps = null;
+		boolean respuesta = false;
+		String sql = "update riesgo set nombre=?, descripcion=?, fechaRiesgo=?, tipo=?, costo=?, "
+				+ "probabilidad=?, nivelRiesgo=?, personaIdentificadora=? where idRiesgo=?";
+		Date fechaRiesgo = new Date(riesgo.getFechaRiesgo().getTime());
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);
+			ps.setString(1, riesgo.getNombre());
+			ps.setString(2, riesgo.getDescripcion());
+			ps.setDate(3, fechaRiesgo);
+			ps.setInt(4, riesgo.getTipo());
+			ps.setDouble(5, riesgo.getCosto());
+			ps.setDouble(6, riesgo.getProbabilidad());
+			ps.setInt(7, riesgo.getNivelRiesgo());
+			ps.setString(8, riesgo.getPersonaIdentificadora());
+			ps.setInt(9, riesgo.getRiesgoId());
+			System.out.println("QUERY actualizarRiesgo: " + sql);
+			ps.execute();
+			ps.close();
+			respuesta = true;
+			
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return respuesta;
+	}
+	
+	public List<?> obtenerNumeroRiesgosPorNivelSQL(Integer anio, Integer mes, ArrayList<Integer> nivelRiesgo) {
+		
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		ArrayList<Riesgo> listaRiesgos = new ArrayList<Riesgo>();
+		
+		String sql = "select * from riesgo";
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);
+			System.out.println("QUERY getRiesgos:" + System.lineSeparator() + sql);
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				Riesgo riesgo = new Riesgo();
+				riesgo.setRiesgoId(rs.getInt("idRiesgo"));
+				riesgo.setNombre(rs.getString("nombre"));
+				riesgo.setDescripcion(rs.getString("descripcion"));
+				riesgo.setFechaRiesgo(rs.getDate("fechaRiesgo"));
+				riesgo.setTipo(rs.getInt("tipo"));
+				riesgo.setCosto(rs.getDouble("costo"));
+				riesgo.setProbabilidad(rs.getDouble("probabilidad"));
+				riesgo.setNivelRiesgo(rs.getInt("nivelRiesgo"));
+				riesgo.setPersonaIdentificadora(rs.getString("personaIdentificadora"));
+				listaRiesgos.add(riesgo);
+			}
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return listaRiesgos;	
+	}
+	
+	public HashMap<Integer,Integer> obtenerNumeroRiesgosPorNivelProcedure(Integer anio, Integer mes, Integer tipoRiesgo){
+		
+		HashMap<Integer,Integer> listaRiegosPorNivel = new HashMap<Integer,Integer>();
+		
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call s_NumeroRiesgosPorNivelBeta(?,?,?)}");) {
+	 
+			cs.setInt(1,anio);
+			cs.setInt(2,mes);
+			
+			
+			
+			//System.out.println(nivelRiesgo.stream().collect(Collectors.joining(","));
+			//System.out.println(String.join(",", nivelRiesgo.toArray()));
+			//String nivelRiesgoString = nivelRiesgo.stream().collect(Collectors.joining(","));
+			
+			cs.setInt(3, tipoRiesgo);
+			
+			System.out.println("anio:" + anio);
+			System.out.println("mes: " + mes);
+			System.out.println("tipoRiesgo: " + tipoRiesgo);
+			
+			
+			boolean hadResults = cs.execute();
+			
+			
+	            
+	        System.out.println("Stored procedure called successfully!");
+	        
+	        //String nivelRiesgoStringLiteral;
+	        
+	        while (hadResults) {
+                ResultSet resultSet = cs.getResultSet();
+ 
+                // process result set
+                while (resultSet.next()) {
+                	
+                	
+                	                	
+                	listaRiegosPorNivel.put(resultSet.getInt("nivel") , resultSet.getInt("suma"));
+                   
+                }
+ 
+                hadResults = cs.getMoreResults();
+            }
+	        
+	        
+ 
+            cs.close();
+	        
+            
+	       
+	 
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        } finally{
+	        	try {
+					jdbc.getConnection().close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+	        }
+		
+		
+		
+		return listaRiegosPorNivel;
+		
+	}
+	
+	public boolean eliminarRiesgo(Riesgo riesgo) {
+		
+		PreparedStatement ps = null;
+		boolean respuesta = false;
+		String sql = "delete from riesgo where idRiesgo=?";
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);
+			ps.setInt(1, riesgo.getRiesgoId());
+			System.out.println("QUERY eliminarRiesgo: " + sql);
+			ps.execute();
+			ps.close();
+			respuesta = true;
+			
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return respuesta;
+	}
+	
 }

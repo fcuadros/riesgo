@@ -1,6 +1,8 @@
 package com.tp2.modulo.sgr;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,7 +17,6 @@ import com.tp2.modulo.sgr.model.proyeccion.Actividad;
 import com.tp2.modulo.sgr.model.proyeccion.Proyecto;
 import com.tp2.modulo.sgr.model.proyeccion.RevisionXActividad;
 import com.tp2.modulo.sgr.service.ProyeccionService;
-
 
 @Path("/proyeccion")
 public class ProyeccionResource {
@@ -41,6 +42,9 @@ public class ProyeccionResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getActividadesByProyecto(@QueryParam("idProyecto") int idProyecto) {
 
+		
+
+		
 		ArrayList<Actividad> listaActividad = proyeccionService.getActividadesByProyecto(idProyecto);
 		String json = gson.toJson(listaActividad);
 		return json;
@@ -65,8 +69,14 @@ public class ProyeccionResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRevisionesByActividad(@QueryParam("idActividad") int idActividad) {
 
+		HashMap<String, Object> map = new LinkedHashMap<>();
+		
+		
+		
 		ArrayList<RevisionXActividad> listaRevisiones = proyeccionService.getRevisionesByActividad(idActividad);
-		String json = gson.toJson(listaRevisiones);
+		
+		map.put("listaRevisiones", listaRevisiones);
+		String json = gson.toJson(map);
 		return json;
 
 	}

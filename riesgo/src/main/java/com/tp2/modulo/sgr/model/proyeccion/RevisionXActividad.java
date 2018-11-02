@@ -10,6 +10,7 @@ public class RevisionXActividad {
 	private Date fechaPlanificada;
 	private double variacionCronograma;
 	private double variacionCosto;
+	private String descripcionPronostico;
 	
 	public Revision getRevision() {
 		return revision;
@@ -40,6 +41,12 @@ public class RevisionXActividad {
 	}
 	public void setVariacionCosto(double variacionCosto) {
 		this.variacionCosto = variacionCosto;
+	}
+	public String getDescripcionPronostico() {
+		return descripcionPronostico;
+	}
+	public void setDescripcionPronostico(String descripcionPronostico) {
+		this.descripcionPronostico = descripcionPronostico;
 	}
 	
 	

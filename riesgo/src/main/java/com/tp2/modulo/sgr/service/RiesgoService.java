@@ -1,7 +1,9 @@
 package com.tp2.modulo.sgr.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.tp2.modulo.sgr.dao.RiesgoDAO;
 import com.tp2.modulo.sgr.model.ActualizarNivelRiesgoRequest;
@@ -10,6 +12,7 @@ import com.tp2.modulo.sgr.model.CalcularNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
+import com.tp2.modulo.sgr.model.Riesgo;
 import com.tp2.modulo.sgr.util.Utilitario;
 
 public class RiesgoService {
@@ -78,5 +81,42 @@ public class RiesgoService {
 			response.setMensajeRespuesta("Error");
 		}
 		return response;
+	}
+	
+	public ArrayList<Riesgo> getRiesgos() {
+		ArrayList<Riesgo> listaRiesgos = riesgoDAO.getRiesgos();
+		
+		return listaRiesgos;
+	}
+	
+	public Map<String,Object> obtenerNumeroRiesgosPorNivel(Integer anio, Integer mes, Integer tipoRiesgo){
+		Map<Integer,Integer> numeroRiegosPorNivel = riesgoDAO.obtenerNumeroRiesgosPorNivelProcedure(anio, mes, tipoRiesgo);
+		
+		Map<String,Object> numeroRiesgosPorNivelMap = new HashMap<String, Object>();
+		
+		List<String> nivelRiesgoLiteral = new ArrayList<String>();
+		
+		for (Integer integer : numeroRiegosPorNivel.keySet()) {
+			
+			switch (integer) {
+			case 1:
+				nivelRiesgoLiteral.add("Bajo");
+				break;
+			case 2:
+				nivelRiesgoLiteral.add("Medio");
+				break;
+			case 3:
+				nivelRiesgoLiteral.add("Alto");
+				break;
+			
+			}
+			
+		}
+		
+		
+		numeroRiesgosPorNivelMap.put("nivelRiesgo",nivelRiesgoLiteral);
+		numeroRiesgosPorNivelMap.put("cantidadRiesgo", numeroRiegosPorNivel.values());
+		
+		return numeroRiesgosPorNivelMap;
 	}
 }
