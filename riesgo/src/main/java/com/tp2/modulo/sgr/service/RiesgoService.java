@@ -13,6 +13,7 @@ import com.tp2.modulo.sgr.model.CalcularNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
+import com.tp2.modulo.sgr.model.RespuestaResponse;
 import com.tp2.modulo.sgr.model.Riesgo;
 import com.tp2.modulo.sgr.model.TipoRiesgo;
 import com.tp2.modulo.sgr.util.Utilitario;
@@ -89,6 +90,60 @@ public class RiesgoService {
 		ArrayList<Riesgo> listaRiesgos = riesgoDAO.getRiesgos();
 		
 		return listaRiesgos;
+	}
+	
+	public RespuestaResponse registrarRiesgo(Riesgo riesgo) {
+		
+		RespuestaResponse respuestaResponse = new RespuestaResponse();
+		boolean respuestaRegistrarRiesgo = false;
+		
+		respuestaRegistrarRiesgo = riesgoDAO.registrarRiesgo(riesgo);
+		
+		if (respuestaRegistrarRiesgo) {
+			respuestaResponse.setCodigoRespuesta("0");
+			respuestaResponse.setMensajeRespuesta("Exito");
+		} else {
+			respuestaResponse.setCodigoRespuesta("1");
+			respuestaResponse.setMensajeRespuesta("Error");
+		}
+		
+		return respuestaResponse;
+	}
+	
+	public RespuestaResponse actualizarRiesgo(Riesgo riesgo) {
+		
+		RespuestaResponse respuestaResponse = new RespuestaResponse();
+		boolean respuestaActualizarRiesgo = false;
+		
+		respuestaActualizarRiesgo = riesgoDAO.actualizarRiesgo(riesgo);
+		
+		if (respuestaActualizarRiesgo) {
+			respuestaResponse.setCodigoRespuesta("0");
+			respuestaResponse.setMensajeRespuesta("Exito");
+		} else {
+			respuestaResponse.setCodigoRespuesta("1");
+			respuestaResponse.setMensajeRespuesta("Error");
+		}
+		
+		return respuestaResponse;
+	}
+	
+	public RespuestaResponse eliminarRiesgo(int idRiesgo) {
+		
+		RespuestaResponse respuestaResponse = new RespuestaResponse();
+		boolean respuestaEliminarRiesgo = false;
+		
+		respuestaEliminarRiesgo = riesgoDAO.eliminarRiesgo(idRiesgo);
+		
+		if (respuestaEliminarRiesgo) {
+			respuestaResponse.setCodigoRespuesta("0");
+			respuestaResponse.setMensajeRespuesta("Exito");
+		} else {
+			respuestaResponse.setCodigoRespuesta("1");
+			respuestaResponse.setMensajeRespuesta("Error");
+		}
+		
+		return respuestaResponse;
 	}
 	
 	public Map<String,Integer> obtenerNumeroRiesgosPorNivel(Integer anio, Integer mes, Integer tipoRiesgo){

@@ -7,13 +7,14 @@ public class Riesgo {
 	private int riesgoId;
 	private String nombre;
 	private String descripcion;
-	private Date fechaRiesgo;
+	private Date fechaRegistro;
 	private int tipo;
 	private double costo;
 	private double probabilidad;
 	private int nivelRiesgo;
 	private String personaIdentificadora;
-	private int ESTRATEGIA_idEstrategiaRespuesta;
+	private Date fechaModificacion;
+	private int idTipoRiesgo;
 
 	public int getRiesgoId() {
 		return riesgoId;
@@ -39,12 +40,12 @@ public class Riesgo {
 		this.nombre = nombre;
 	}
 
-	public Date getFechaRiesgo() {
-		return fechaRiesgo;
+	public Date getFechaRegistro() {
+		return fechaRegistro;
 	}
 
-	public void setFechaRiesgo(Date fechaRiesgo) {
-		this.fechaRiesgo = fechaRiesgo;
+	public void setFechaRegistro(Date fechaRiesgo) {
+		this.fechaRegistro = fechaRiesgo;
 	}
 
 	public int getTipo() {
@@ -87,12 +88,20 @@ public class Riesgo {
 		this.personaIdentificadora = personaIdentificadora;
 	}
 
-	public int getESTRATEGIA_idEstrategiaRespuesta() {
-		return ESTRATEGIA_idEstrategiaRespuesta;
+	public Date getFechaModificacion() {
+		return fechaModificacion;
 	}
 
-	public void setESTRATEGIA_idEstrategiaRespuesta(int eSTRATEGIA_idEstrategiaRespuesta) {
-		ESTRATEGIA_idEstrategiaRespuesta = eSTRATEGIA_idEstrategiaRespuesta;
+	public void setFechaModificacion(Date fechaModificacion) {
+		this.fechaModificacion = fechaModificacion;
+	}
+
+	public int getIdTipoRiesgo() {
+		return idTipoRiesgo;
+	}
+
+	public void setIdTipoRiesgo(int idTipoRiesgo) {
+		this.idTipoRiesgo = idTipoRiesgo;
 	}
 
 	@Override
