@@ -76,7 +76,8 @@ public class RiesgoResource {
 	
 	  @GET
 	  @Path("/obtenerNumeroRiegosPorNivel")
-	  @Produces({"application/json"})
+	  @Consumes(MediaType.APPLICATION_JSON)
+	  @Produces(MediaType.APPLICATION_JSON)
 	  public String obtenerNumeroRiesgosPorNivel(@QueryParam("anio") int anio, @QueryParam("tipoRiesgo") int tipoRiesgo, @QueryParam("mes") int mes)
 	  {
 	    Map<String, Integer> map = riesgoService.obtenerNumeroRiesgosPorNivel(Integer.valueOf(anio), Integer.valueOf(mes), Integer.valueOf(tipoRiesgo));
@@ -87,12 +88,11 @@ public class RiesgoResource {
 	  }
 	  
 	  @GET
-	  @Path("/getTipoRiesgo")
-	  @Consumes({"application/json"})
-	  @Produces({"application/json"})
+	  @Path("/getTipoRiesgo")	  
+	  @Produces(MediaType.APPLICATION_JSON)
 	  public String getTipoRiesgo()
 	  {
-	    HashMap<String, Object> map = new LinkedHashMap();
+		  LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
 	    
 	    ArrayList<TipoRiesgo> listaTipoRiesgo = riesgoService.getListaTipoRiesgo();
 	    
