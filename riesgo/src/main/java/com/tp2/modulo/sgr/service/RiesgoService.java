@@ -2,6 +2,7 @@ package com.tp2.modulo.sgr.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -90,24 +91,34 @@ public class RiesgoService {
 		return listaRiesgos;
 	}
 	
-	public Map<String,Object> obtenerNumeroRiesgosPorNivel(Integer anio, Integer mes, Integer tipoRiesgo){
+	public Map<String,Integer> obtenerNumeroRiesgosPorNivel(Integer anio, Integer mes, Integer tipoRiesgo){
 		Map<Integer,Integer> numeroRiegosPorNivel = riesgoDAO.obtenerNumeroRiesgosPorNivelProcedure(anio, mes, tipoRiesgo);
+		
+		Map<String,Integer> numeroRiegosPorNivelString = new LinkedHashMap<String,Integer>();
 		
 		Map<String,Object> numeroRiesgosPorNivelMap = new HashMap<String, Object>();
 		
 		List<String> nivelRiesgoLiteral = new ArrayList<String>();
+		
+		
+		
+		
+		numeroRiesgosPorNivelMap = new HashMap<String, Object>();
 		
 		for (Integer integer : numeroRiegosPorNivel.keySet()) {
 			
 			switch (integer) {
 			case 1:
 				nivelRiesgoLiteral.add("Bajo");
+				numeroRiegosPorNivelString.put("Bajo",numeroRiegosPorNivel.get(1));
 				break;
 			case 2:
-				nivelRiesgoLiteral.add("Medio");
+				nivelRiesgoLiteral.add("Medio");				
+				numeroRiegosPorNivelString.put("Medio",numeroRiegosPorNivel.get(2));
 				break;
 			case 3:
 				nivelRiesgoLiteral.add("Alto");
+				numeroRiegosPorNivelString.put("Alto",numeroRiegosPorNivel.get(3));
 				break;
 			
 			}
@@ -118,7 +129,7 @@ public class RiesgoService {
 		numeroRiesgosPorNivelMap.put("nivelRiesgo",nivelRiesgoLiteral);
 		numeroRiesgosPorNivelMap.put("cantidadRiesgo", numeroRiegosPorNivel.values());
 		
-		return numeroRiesgosPorNivelMap;
+		return numeroRiegosPorNivelString;
 	}
 
 	public ArrayList<TipoRiesgo> getListaTipoRiesgo() {

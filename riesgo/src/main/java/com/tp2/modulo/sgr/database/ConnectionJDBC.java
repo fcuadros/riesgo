@@ -10,10 +10,10 @@ public class ConnectionJDBC {
 		Connection connection = null;
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dbriesgo?useUnicode=true&"
+			connection = DriverManager.getConnection("jdbc:mysql://104.154.86.66:3306/dbriesgo?useUnicode=true&"
 					+ "useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&"
 					+ "serverTimezone=UTC&useSSL=false",
-					"root", "ajayopues");
+					"root","@AccesoTP3");
 		} catch (ClassNotFoundException cnfe) {
 			cnfe.printStackTrace();
 		} catch (SQLException sql) {
