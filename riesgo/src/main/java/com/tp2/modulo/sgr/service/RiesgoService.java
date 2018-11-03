@@ -13,6 +13,7 @@ import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
 import com.tp2.modulo.sgr.model.Riesgo;
+import com.tp2.modulo.sgr.model.TipoRiesgo;
 import com.tp2.modulo.sgr.util.Utilitario;
 
 public class RiesgoService {
@@ -118,5 +119,14 @@ public class RiesgoService {
 		numeroRiesgosPorNivelMap.put("cantidadRiesgo", numeroRiegosPorNivel.values());
 		
 		return numeroRiesgosPorNivelMap;
+	}
+
+	public ArrayList<TipoRiesgo> getListaTipoRiesgo() {
+
+		ArrayList<TipoRiesgo> listaTipoRiesgo = riesgoDAO.getListaTipoRiesgo();
+		
+		return listaTipoRiesgo;
+		
+		
 	}
 }

@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.google.gson.Gson;
 import com.tp2.modulo.sgr.model.Riesgo;
+import com.tp2.modulo.sgr.model.TipoRiesgo;
 import com.tp2.modulo.sgr.model.proyeccion.Actividad;
 import com.tp2.modulo.sgr.model.proyeccion.Proyecto;
 import com.tp2.modulo.sgr.model.proyeccion.RevisionXActividad;
@@ -79,7 +80,7 @@ public class ProyeccionResource {
 		String json = gson.toJson(map);
 		return json;
 
-	}
+	}	
 
 	@GET
 	@Path("/calcularPronostico")

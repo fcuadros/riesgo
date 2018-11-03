@@ -18,6 +18,7 @@ import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
 import com.tp2.modulo.sgr.model.Riesgo;
+import com.tp2.modulo.sgr.model.TipoRiesgo;
 
 public class RiesgoDAO {
 
@@ -426,6 +427,56 @@ public class RiesgoDAO {
 		
 	}
 	
+	public ArrayList<TipoRiesgo> getListaTipoRiesgo() {
+		
+		
+		ArrayList<TipoRiesgo>  listaTipoRiesgo = new ArrayList<TipoRiesgo>();
+
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call S_tipoRiesgo()}");) {
+
+			// System.out.println(nivelRiesgo.stream().collect(Collectors.joining(","));
+			// System.out.println(String.join(",", nivelRiesgo.toArray()));
+			// String nivelRiesgoString = nivelRiesgo.stream().collect(Collectors.joining(","));
+
+			boolean hadResults = cs.execute();
+
+			System.out.println("Stored procedure called successfully!");
+
+			// String nivelRiesgoStringLiteral;
+
+			while (hadResults) {
+				ResultSet resultSet = cs.getResultSet();
+
+				// process result set
+				while (resultSet.next()) {
+					
+					TipoRiesgo tipoRiesgo = new TipoRiesgo();
+
+					tipoRiesgo.setCodTipoRiesgo(resultSet.getInt("codigo"));
+					tipoRiesgo.setNombreTipoRiesgo(resultSet.getString("nombre"));
+
+					listaTipoRiesgo.add(tipoRiesgo);
+				}
+
+				hadResults = cs.getMoreResults();
+			}
+
+			cs.close();
+
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return listaTipoRiesgo;		
+	}
+	
+	
 	public boolean eliminarRiesgo(Riesgo riesgo) {
 		
 		PreparedStatement ps = null;
@@ -454,5 +505,6 @@ public class RiesgoDAO {
 		
 		return respuesta;
 	}
+
 	
 }
