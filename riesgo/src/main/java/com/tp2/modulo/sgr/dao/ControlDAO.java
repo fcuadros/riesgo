@@ -58,8 +58,8 @@ public class ControlDAO {
 		
 		PreparedStatement ps = null;
 		boolean respuesta = false;
-		String sql = "insert into tbl_control(tx_descripcion, tx_tipo, tx_responsable, tx_estadoImplemtacion, tx_equipoResponsable, fe_implementacion, tx_costo) "
-				+ "values (?,?,?,?,?,?,?)";
+		String sql = "insert into tbl_control(tx_descripcion, tx_tipo, tx_responsable, tx_estadoImplemtacion, tx_equipoResponsable, fe_implementacion, tx_costo, cod_riesgo) "
+				+ "values (?,?,?,?,?,?,?,?)";
 		Date fechaImplementacion = new Date(new java.util.Date().getTime());
 		
 		try {
@@ -71,6 +71,7 @@ public class ControlDAO {
 			ps.setString(5, control.getEquipoResponsable());
 			ps.setDate(6, fechaImplementacion);
 			ps.setDouble(7, control.getCosto());
+			ps.setInt(8, control.getRIESGO_riesgoId());
 			System.out.println("QUERY registrarControl: " + System.lineSeparator() + sql);
 			ps.execute();
 			ps.close();
