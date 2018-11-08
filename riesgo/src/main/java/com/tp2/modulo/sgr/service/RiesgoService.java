@@ -150,29 +150,34 @@ public class RiesgoService {
 		Map<Integer,Integer> numeroRiegosPorNivel = riesgoDAO.obtenerNumeroRiesgosPorNivelProcedure(anio, mes, tipoRiesgo);
 		
 		Map<String,Integer> numeroRiegosPorNivelString = new LinkedHashMap<String,Integer>();
+		//Inicializar los Valores con ceros:
+		numeroRiegosPorNivelString.put("Bajo",0);
+		numeroRiegosPorNivelString.put("Medio",0);
+		numeroRiegosPorNivelString.put("Alto",0);
 		
 		Map<String,Object> numeroRiesgosPorNivelMap = new HashMap<String, Object>();
 		
 		List<String> nivelRiesgoLiteral = new ArrayList<String>();
 		
-		
-		
+		nivelRiesgoLiteral.add("Bajo");
+		nivelRiesgoLiteral.add("Medio");
+		nivelRiesgoLiteral.add("Alto");
 		
 		numeroRiesgosPorNivelMap = new HashMap<String, Object>();
 		
-		for (Integer integer : numeroRiegosPorNivel.keySet()) {
+		for (Integer integer : numeroRiegosPorNivel.keySet()) {			
 			
 			switch (integer) {
 			case 1:
-				nivelRiesgoLiteral.add("Bajo");
+				
 				numeroRiegosPorNivelString.put("Bajo",numeroRiegosPorNivel.get(1));
 				break;
 			case 2:
-				nivelRiesgoLiteral.add("Medio");				
+								
 				numeroRiegosPorNivelString.put("Medio",numeroRiegosPorNivel.get(2));
 				break;
 			case 3:
-				nivelRiesgoLiteral.add("Alto");
+				
 				numeroRiegosPorNivelString.put("Alto",numeroRiegosPorNivel.get(3));
 				break;
 			
