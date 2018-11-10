@@ -199,7 +199,7 @@ public class RiesgoDAO {
 		
 		ArrayList<Riesgo> listaRiesgos = new ArrayList<Riesgo>();
 		
-		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call S_Riesgo()}");) {
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASS_Riesgo()}");) {
 			
 			boolean hadResults = cs.execute();
 			
@@ -247,7 +247,7 @@ public class RiesgoDAO {
 		boolean respuesta = false;
 		Date fechaRegistro = new Date(new java.util.Date().getTime());
 		
-		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call I_Riesgo(?,?,?,?,?,?,?,?,?,?)}");) {
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASI_Riesgo(?,?,?,?,?,?,?,?,?,?)}");) {
 			
 			cs.setString(1, riesgo.getNombre());
 			cs.setString(2, riesgo.getDescripcion());
@@ -282,7 +282,7 @@ public class RiesgoDAO {
 		boolean respuesta = false;
 		Date fechaModificacion = new Date(new java.util.Date().getTime());
 		
-		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call U_Riesgo(?,?,?,?,?,?,?,?,?,?)}");) {
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASU_Riesgo(?,?,?,?,?,?,?,?,?,?)}");) {
 			cs.setInt(1, riesgo.getRiesgoId());
 			cs.setString(2, riesgo.getNombre());
 			cs.setString(3, riesgo.getDescripcion());
@@ -471,25 +471,19 @@ public class RiesgoDAO {
 		return listaTipoRiesgo;		
 	}
 	
-	
 	public boolean eliminarRiesgo(int idRiesgo) {
 		
-		PreparedStatement ps = null;
 		boolean respuesta = false;
-		String sql = "delete from tbl_riesgo where cod_riesgo=?";
 		
-		try {
-			ps = jdbc.getConnection().prepareStatement(sql);
-			ps.setInt(1, idRiesgo);
-			System.out.println("QUERY eliminarRiesgo: " + System.lineSeparator() + sql);
-			ps.execute();
-			ps.close();
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASD_Riesgo(?)}");) {
+			cs.setInt(1, idRiesgo);
+			cs.execute();
+			System.out.println("Stored procedure called successfully!");
+			cs.close();
 			respuesta = true;
 			
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				jdbc.getConnection().close();

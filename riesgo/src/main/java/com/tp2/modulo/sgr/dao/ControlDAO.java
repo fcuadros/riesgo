@@ -1,7 +1,7 @@
 package com.tp2.modulo.sgr.dao;
 
+import java.sql.CallableStatement;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,34 +15,38 @@ public class ControlDAO {
 	
 	public ArrayList<Control> getControles() {
 		
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		
 		ArrayList<Control> listaControles = new ArrayList<Control>();
 		
-		String sql = "select * from tbl_control";
-		
-		try {
-			ps = jdbc.getConnection().prepareStatement(sql);
-			System.out.println("QUERY getControles:" + System.lineSeparator() + sql);
-			rs = ps.executeQuery();
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASS_Control()}");) {
 			
-			while (rs.next()) {
-				Control control = new Control();
-				control.setIdControl(rs.getInt("cod_Control"));
-				control.setDescripcion(rs.getString("tx_descripcion"));
-				control.setTipo(rs.getInt("tx_tipo"));
-				control.setResponsable(rs.getString("tx_responsable"));
-				control.setEstadoImplementacion(rs.getInt("tx_estadoImplemtacion"));
-				control.setEquipoResponsable(rs.getString("tx_equipoResponsable"));
-				control.setFechaImplementacion(rs.getDate("fe_implementacion"));
-				control.setCosto(rs.getDouble("tx_costo"));
-				listaControles.add(control);
+			boolean hadResults = cs.execute();
+			
+			System.out.println("Stored procedure called successfully!");
+			
+			while (hadResults) {
+				ResultSet resultSet = cs.getResultSet();
+				
+				while (resultSet.next()) {
+					Control control = new Control();
+					
+					control.setIdControl(resultSet.getInt("cod_Control"));
+					control.setDescripcion(resultSet.getString("tx_descripcion"));
+					control.setTipo(resultSet.getInt("tx_tipo"));
+					control.setResponsable(resultSet.getString("tx_responsable"));
+					control.setEstadoImplementacion(resultSet.getInt("tx_estadoImplemtacion"));
+					control.setEquipoResponsable(resultSet.getString("tx_equipoResponsable"));
+					control.setFechaImplementacion(resultSet.getDate("fe_implementacion"));
+					control.setCosto(resultSet.getDouble("tx_costo"));
+					
+					listaControles.add(control);
+				}
+				
+				hadResults = cs.getMoreResults();
 			}
+			
+			cs.close();
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				jdbc.getConnection().close();
@@ -56,31 +60,26 @@ public class ControlDAO {
 	
 	public boolean registrarControl(Control control) {
 		
-		PreparedStatement ps = null;
 		boolean respuesta = false;
-		String sql = "insert into tbl_control(tx_descripcion, tx_tipo, tx_responsable, tx_estadoImplemtacion, tx_equipoResponsable, fe_implementacion, tx_costo, cod_riesgo) "
-				+ "values (?,?,?,?,?,?,?,?)";
 		Date fechaImplementacion = new Date(new java.util.Date().getTime());
 		
-		try {
-			ps = jdbc.getConnection().prepareStatement(sql);
-			ps.setString(1, control.getDescripcion());
-			ps.setInt(2, control.getTipo());
-			ps.setString(3, control.getResponsable());
-			ps.setInt(4, control.getEstadoImplementacion());
-			ps.setString(5, control.getEquipoResponsable());
-			ps.setDate(6, fechaImplementacion);
-			ps.setDouble(7, control.getCosto());
-			ps.setInt(8, control.getRIESGO_riesgoId());
-			System.out.println("QUERY registrarControl: " + System.lineSeparator() + sql);
-			ps.execute();
-			ps.close();
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASI_Control(?,?,?,?,?,?,?,?)}");) {
+			
+			cs.setString(1, control.getDescripcion());
+			cs.setInt(2, control.getTipo());
+			cs.setString(3, control.getResponsable());
+			cs.setInt(4, control.getEstadoImplementacion());
+			cs.setString(5, control.getEquipoResponsable());
+			cs.setDate(6, fechaImplementacion);
+			cs.setDouble(7, control.getCosto());
+			cs.setInt(8, control.getRIESGO_riesgoId());
+			cs.execute();
+			System.out.println("Stored procedure called successfully!");
+			cs.close();
 			respuesta = true;
 			
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				jdbc.getConnection().close();
@@ -94,31 +93,26 @@ public class ControlDAO {
 	
 	public boolean actualizarControl(Control control) {
 		
-		PreparedStatement ps = null;
 		boolean respuesta = false;
-		String sql = "update tbl_control set tx_descripcion=?, tx_tipo=?, tx_responsable=?, tx_estadoImplemtacion=?, tx_equipoResponsable=?, "
-				+ "fe_implementacion=?, tx_costo=? where cod_Control=?";
 		Date fechaImplementacion = new Date(new java.util.Date().getTime());
 		
-		try {
-			ps = jdbc.getConnection().prepareStatement(sql);
-			ps.setString(1, control.getDescripcion());
-			ps.setInt(2, control.getTipo());
-			ps.setString(3, control.getResponsable());
-			ps.setInt(4, control.getEstadoImplementacion());
-			ps.setString(5, control.getEquipoResponsable());
-			ps.setDate(6, fechaImplementacion);
-			ps.setDouble(7, control.getCosto());
-			ps.setInt(8, control.getIdControl());
-			System.out.println("QUERY actualizarControl: " + System.lineSeparator() + sql);
-			ps.execute();
-			ps.close();
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASU_Control(?,?,?,?,?,?,?,?,?)}");) {
+			cs.setInt(1, control.getIdControl());
+			cs.setString(2, control.getDescripcion());
+			cs.setInt(3, control.getTipo());
+			cs.setString(4, control.getResponsable());
+			cs.setInt(5, control.getEstadoImplementacion());
+			cs.setString(6, control.getEquipoResponsable());
+			cs.setDate(7, fechaImplementacion);
+			cs.setDouble(8, control.getCosto());
+			cs.setInt(9, control.getRIESGO_riesgoId());
+			cs.execute();
+			System.out.println("Stored procedure called successfully!");
+			cs.close();
 			respuesta = true;
 			
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				jdbc.getConnection().close();
@@ -132,22 +126,17 @@ public class ControlDAO {
 	
 	public boolean eliminarControl(int idControl) {
 		
-		PreparedStatement ps = null;
 		boolean respuesta = false;
-		String sql = "delete from tbl_control where cod_Control=?";
 		
-		try {
-			ps = jdbc.getConnection().prepareStatement(sql);
-			ps.setInt(1, idControl);
-			System.out.println("QUERY eliminarControl: " + System.lineSeparator() + sql);
-			ps.execute();
-			ps.close();
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASD_Control(?)}");) {
+			cs.setInt(1, idControl);
+			cs.execute();
+			System.out.println("Stored procedure called successfully!");
+			cs.close();
 			respuesta = true;
 			
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			try {
 				jdbc.getConnection().close();
