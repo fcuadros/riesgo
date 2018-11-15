@@ -11,6 +11,7 @@ import com.tp2.modulo.sgr.model.ActualizarNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.ActualizarNivelRiesgoResponse;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
+import com.tp2.modulo.sgr.model.Montecarlo;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
 import com.tp2.modulo.sgr.model.RespuestaResponse;
@@ -21,6 +22,65 @@ import com.tp2.modulo.sgr.util.Utilitario;
 public class RiesgoService {
 
 	RiesgoDAO riesgoDAO = new RiesgoDAO();
+	
+	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> obtenerCantRiesgosXControl(int year) {
+		
+		
+		List<Object> cantidadTotalRiesgo = new ArrayList<Object>();
+		
+	
+		
+		
+		List<Object> numTotalRiesgosSinControl = new ArrayList<Object>();
+		
+		for (int i = 0; i < 12; i++) {
+			cantidadTotalRiesgo.add(0);
+			numTotalRiesgosSinControl.add(0);
+		}
+
+		List<Map<String, Object>> cantRiesgosXControlResult = null;
+		if (0 != year) {
+			
+			cantRiesgosXControlResult = new ArrayList<>();
+
+		List<Map<String, Object>> arrayCantTotalRiesgo = (List<Map<String, Object>>) riesgoDAO.obtenerCantidadRiesgoPorFechaSQL(year);
+		List<Map<String, Object>> arrayCantTotalRiesgoSinControl = (List<Map<String, Object>>) riesgoDAO.obtenerCantidadRiesgoSinControlPorFechaSQL(year);
+		
+		
+			for (Map<String, Object> map : arrayCantTotalRiesgo) {
+
+				for (int i = 1; i < 13; i++) {
+					ajustarArrayRiesgoControl(map, i, cantidadTotalRiesgo);
+
+				}
+
+			}
+		
+		
+		for (Map<String, Object> map : arrayCantTotalRiesgoSinControl) {
+			for (int i = 1; i < 13; i++) {
+				ajustarArrayRiesgoControl(map, i, numTotalRiesgosSinControl);
+
+			}	
+		}
+		
+		Map<String, Object> map = new HashMap<>();
+		map.put("name", "Riesgos totales");
+		map.put("data", cantidadTotalRiesgo);
+		map.put("color", "#006f99");			
+		cantRiesgosXControlResult.add(new HashMap<String, Object>(map));
+		
+		map.clear();
+		map.put("name", "Riesgos sin control asignado");
+		map.put("data", numTotalRiesgosSinControl);
+		map.put("color", "#d73d32");	 //rojo		
+		cantRiesgosXControlResult.add(new HashMap<String, Object>(map));
+		
+			
+		}
+		return cantRiesgosXControlResult;
+	}
 	
 	public CalcularNivelRiesgoResponse calcularNivelRiesgo(CalcularNivelRiesgoRequest request) {
 		CalcularNivelRiesgoResponse response = new CalcularNivelRiesgoResponse();
@@ -49,7 +109,7 @@ public class RiesgoService {
 		}
 		return response;
 	}
-	
+
 	public ActualizarNivelRiesgoResponse actualizarNivelRiesgo(ActualizarNivelRiesgoRequest request) {
 		ActualizarNivelRiesgoResponse response = new ActualizarNivelRiesgoResponse();
 		
@@ -87,9 +147,13 @@ public class RiesgoService {
 	}
 	
 	public ArrayList<Riesgo> getRiesgos() {
-		ArrayList<Riesgo> listaRiesgos = riesgoDAO.getRiesgos();
-		
+		ArrayList<Riesgo> listaRiesgos = riesgoDAO.getRiesgos();		
 		return listaRiesgos;
+	}
+	
+	public Riesgo getRiesgo(int idRiesgo) {
+		Riesgo riesgo = riesgoDAO.getRiesgo(idRiesgo);		
+		return riesgo;
 	}
 	
 	public RespuestaResponse registrarRiesgo(Riesgo riesgo) {
@@ -199,5 +263,28 @@ public class RiesgoService {
 		return listaTipoRiesgo;
 		
 		
+	}
+	
+	public Montecarlo obtenerPerdidaRiesgos(int cantSimulacion) {
+		Montecarlo montecarlo = riesgoDAO.obtenerPerdidaRiesgos(cantSimulacion);
+		double promedio = 0.0;
+		double desvEstandar = 0.0;
+		
+		promedio = Utilitario.calcularPromedio(montecarlo.getPerdida(), cantSimulacion);
+		desvEstandar = Utilitario.calcularDesviacionEstandar(montecarlo.getPerdida(), cantSimulacion);
+		
+		montecarlo.setPromedio(promedio);
+		montecarlo.setDesvEstandar(desvEstandar);
+		
+		return montecarlo;
+	}
+	
+	public void ajustarArrayRiesgoControl(Map<String,Object> mapa, int i, List<Object> arrayString){
+		
+		
+		
+		if (mapa.get("meses").equals(String.valueOf(i))) {
+			arrayString.set(i-1, (Object) mapa.get("totalRiesgo"));
+		}
 	}
 }

@@ -8,11 +8,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.tp2.modulo.sgr.database.ConnectionJDBC;
 import com.tp2.modulo.sgr.model.ActualizarNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoRequest;
 import com.tp2.modulo.sgr.model.CalcularNivelRiesgoResponse;
+import com.tp2.modulo.sgr.model.Montecarlo;
 import com.tp2.modulo.sgr.model.NivelRiesgoHistorico;
 import com.tp2.modulo.sgr.model.ObtenerNivelRiesgoHistoricoResponse;
 import com.tp2.modulo.sgr.model.Riesgo;
@@ -199,7 +201,7 @@ public class RiesgoDAO {
 		
 		ArrayList<Riesgo> listaRiesgos = new ArrayList<Riesgo>();
 		
-		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASS_Riesgo()}");) {
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASS_Riesgos()}");) {
 			
 			boolean hadResults = cs.execute();
 			
@@ -240,6 +242,49 @@ public class RiesgoDAO {
 		}
 		
 		return listaRiesgos;
+	}
+	
+	public Riesgo getRiesgo(int idRiesgo) {
+		
+		Riesgo riesgo = new Riesgo();
+		
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASS_Riesgo(?)}");) {
+			cs.setInt(1, idRiesgo);
+			boolean hadResults = cs.execute();
+			
+			System.out.println("Stored procedure called successfully!");
+			
+			while (hadResults) {
+				ResultSet resultSet = cs.getResultSet();
+				
+				while (resultSet.next()) {					
+					riesgo.setRiesgoId(resultSet.getInt("cod_riesgo"));
+					riesgo.setNombre(resultSet.getString("no_riesgo"));
+					riesgo.setDescripcion(resultSet.getString("descripcion"));
+					riesgo.setFechaRegistro(resultSet.getDate("fe_registro"));
+					riesgo.setTipo(resultSet.getInt("tx_tipo"));
+					riesgo.setCosto(resultSet.getDouble("nu_costo"));
+					riesgo.setProbabilidad(resultSet.getDouble("nu_probabilidad"));
+					riesgo.setNivelRiesgo(resultSet.getInt("nu_nivelRiesgo"));
+					riesgo.setPersonaIdentificadora(resultSet.getString("tx_personaIdentificadora"));
+					riesgo.setFechaModificacion(resultSet.getDate("fe_modificacion"));
+				}
+				
+				hadResults = cs.getMoreResults();
+			}
+			
+			cs.close();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return riesgo;
 	}
 	
 	public boolean registrarRiesgo(Riesgo riesgo) {
@@ -354,74 +399,186 @@ public class RiesgoDAO {
 		return listaRiesgos;	
 	}
 	
-	public HashMap<Integer,Integer> obtenerNumeroRiesgosPorNivelProcedure(Integer anio, Integer mes, Integer tipoRiesgo){
-		
-		HashMap<Integer,Integer> listaRiegosPorNivel = new HashMap<Integer,Integer>();
-		
+	public HashMap<Integer, Integer> obtenerNumeroRiesgosPorNivelProcedure(Integer anio, Integer mes,
+			Integer tipoRiesgo) {
+
+		HashMap<Integer, Integer> listaRiegosPorNivel = new HashMap<Integer, Integer>();
+
 		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call s_NumeroRiesgosPorNivelBeta(?,?,?)}");) {
-	 
-			cs.setInt(1,anio);
-			cs.setInt(2,mes);
-			
-			
-			
-			//System.out.println(nivelRiesgo.stream().collect(Collectors.joining(","));
-			//System.out.println(String.join(",", nivelRiesgo.toArray()));
-			//String nivelRiesgoString = nivelRiesgo.stream().collect(Collectors.joining(","));
-			
+
+			cs.setInt(1, anio);
+			cs.setInt(2, mes);
+
+			// System.out.println(nivelRiesgo.stream().collect(Collectors.joining(","));
+			// System.out.println(String.join(",", nivelRiesgo.toArray()));
+			// String nivelRiesgoString =
+			// nivelRiesgo.stream().collect(Collectors.joining(","));
+
 			cs.setInt(3, tipoRiesgo);
-			
+
 			System.out.println("anio:" + anio);
 			System.out.println("mes: " + mes);
 			System.out.println("tipoRiesgo: " + tipoRiesgo);
-			
-			
+
 			boolean hadResults = cs.execute();
-			
-			
-	            
-	        System.out.println("Stored procedure called successfully!");
-	        
-	        //String nivelRiesgoStringLiteral;
-	        
-	        while (hadResults) {
-                ResultSet resultSet = cs.getResultSet();
- 
-                // process result set
-                while (resultSet.next()) {
-                	
-                	
-                	                	
-                	listaRiegosPorNivel.put(resultSet.getInt("nivel") , resultSet.getInt("suma"));
-                   
-                }
- 
-                hadResults = cs.getMoreResults();
-            }
-	        
-	        
- 
-            cs.close();
-	        
-            
-	       
-	 
-	        } catch (SQLException ex) {
-	            ex.printStackTrace();
-	        } finally{
-	        	try {
-					jdbc.getConnection().close();
-				} catch (SQLException e) {
-					e.printStackTrace();
+
+			System.out.println("Stored procedure called successfully!");
+
+			// String nivelRiesgoStringLiteral;
+
+			while (hadResults) {
+				ResultSet resultSet = cs.getResultSet();
+
+				// process result set
+				while (resultSet.next()) {
+
+					listaRiegosPorNivel.put(resultSet.getInt("nivel"), resultSet.getInt("suma"));
+
 				}
-	        }
-		
-		
-		
+
+				hadResults = cs.getMoreResults();
+			}
+
+			cs.close();
+
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
 		return listaRiegosPorNivel;
+
+	}
+	
+	public List<?> obtenerCantidadRiesgoSinControlPorFechaSQL(int year){
+		
+		List<Map<String, Object>> arrayCantRiesgoSinControlPorFecha = new ArrayList<Map<String, Object>>();
+		
+		
+		
+		
+		String mes;
+		String anio;
+		int totalRiesgo;
+		
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		
+		String sql = "select year(rie.fe_registro) as anio, month(rie.fe_registro) as mes,count(*) as total from tbl_riesgo rie "+
+		"left outer join tbl_control ctl " +
+        "on rie.cod_riesgo=ctl.cod_riesgo " +
+		"where ctl.cod_riesgo is null " +
+        "and year(rie.fe_registro) = " + year + " " +
+        "group by anio, mes ";
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);			
+			System.out.println("QUERY cantRiesgoPorFecha: " + sql);
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				Map<String,Object> mapa = new HashMap<String,Object>();
+				 anio = rs.getString("anio");
+				 mes = rs.getString("mes");
+				 totalRiesgo = Integer.parseInt(rs.getString("total"));
+				 mapa.put("meses",mes);				 
+				 mapa.put("totalRiesgo",totalRiesgo);	
+				 arrayCantRiesgoSinControlPorFecha.add(mapa);	
+			}
+			
+			
+			
+			
+
+				
+			
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
+		
+		return arrayCantRiesgoSinControlPorFecha;
 		
 	}
 	
+	public List<?> obtenerCantidadRiesgoPorFechaSQL(int year){
+		
+		List<Map<String, Object>> arrayCantRiesgoPorFecha = new ArrayList<Map<String, Object>>();
+		
+		
+		
+		
+		
+		String mes;
+		String anio;
+		int totalRiesgo;
+		
+		
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		
+		String sql = "select year(rie.fe_registro) as anio, month(rie.fe_registro) as mes,count(*) as total from tbl_riesgo rie "+
+		"where year(rie.fe_registro) = " + year + " " +
+	    "group by anio, mes ";
+		
+		try {
+			ps = jdbc.getConnection().prepareStatement(sql);			
+			System.out.println("QUERY cantRiesgoPorFecha: " + sql);
+			rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				Map<String,Object> mapa = new HashMap<String,Object>();
+				 anio = rs.getString("anio");
+				 mes = rs.getString("mes");
+				 totalRiesgo = Integer.parseInt(rs.getString("total"));
+				 
+				 mapa.put("meses",mes);				 
+				 mapa.put("totalRiesgo",totalRiesgo);
+				 arrayCantRiesgoPorFecha.add(mapa);
+				 
+				
+			}
+			
+			//arrayCantRiesgoPorFecha.add(mapa);
+				
+	
+				System.out.println(arrayCantRiesgoPorFecha);
+			
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
+		
+		return arrayCantRiesgoPorFecha;
+		
+	}
+
 	public ArrayList<TipoRiesgo> getListaTipoRiesgo() {
 		
 		
@@ -495,5 +652,50 @@ public class RiesgoDAO {
 		return respuesta;
 	}
 
-	
+	public Montecarlo obtenerPerdidaRiesgos(int cantSimulacion) {
+		Montecarlo respuesta = null;
+		int id = 0;
+		double perdida = 0.0;
+		List<Integer> ids = new ArrayList<Integer>();
+		List<Double> perdidas = new ArrayList<Double>();
+		int inicioSimulacion = 0;
+		
+		try (CallableStatement cs = jdbc.getConnection().prepareCall("{call INDRASS_MonteCarloSUM(?,?)}");) {
+			cs.setInt(1, inicioSimulacion);
+			cs.setInt(2, cantSimulacion);
+			boolean hadResults = cs.execute();
+			
+			System.out.println("Stored procedure called successfully!");
+			
+			while (hadResults) {
+				ResultSet resultSet = cs.getResultSet();
+				
+				while (resultSet.next()) {
+					respuesta = new Montecarlo();
+					id = resultSet.getInt("id");
+					perdida = resultSet.getDouble("perdida");
+					
+					ids.add(id);
+					perdidas.add(perdida);
+				}
+				
+				respuesta.setId(ids);
+				respuesta.setPerdida(perdidas);
+				
+				hadResults = cs.getMoreResults();
+			}
+			
+			cs.close();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		} finally {
+			try {
+				jdbc.getConnection().close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return respuesta;
+	}
 }
